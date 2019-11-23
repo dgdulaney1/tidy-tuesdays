@@ -1,0 +1,117 @@
+---
+title: ""
+subtitle: ""
+output:
+  github_document:
+    toc: true
+allow_html: true
+editor_options:
+  chunk_output_type: console
+fig.width: 10
+fig.height: 7
+---
+
+```{r}
+
+library(tidyverse)
+library(here)
+library(readxl)
+library(scales)
+
+```
+
+```{r}
+
+theme_set(theme_light())
+
+```
+
+
+```{r}
+
+nfl_salaries_raw <- read_xlsx(here("nfl-salaries", "nfl_salaries.xlsx"))
+
+nfl_salaries <- read_xlsx(here("nfl-salaries", "nfl_salaries.xlsx")) %>% 
+  pivot_longer(-year, names_to = "position", values_to = "salary")
+
+```
+
+----------
+
+# Which positions make the most?
+
+```{r positional_salaries_overall}
+
+nfl_salaries %>% 
+  group_by(position) %>% 
+  summarise(salary = mean(salary, na.rm = TRUE)) %>% 
+  mutate(position = fct_reorder(position, salary)) %>% 
+  ggplot(aes(position, salary, fill = position)) + 
+  geom_col() +
+  scale_y_continuous(labels = dollar_format()) +
+  coord_flip() +
+  labs(title = "Average salary from 2011-2018", 
+       subtitle = "",
+       x = "",
+       y = "Salary") +
+  theme(legend.position = "none")
+
+```
+
+
+----------
+
+# How are salaries trending over time for different positions?
+
+```{r}
+
+positional_trends <- nfl_salaries %>% 
+  group_by(year, position) %>% 
+  summarise(salary = mean(salary, na.rm = TRUE)) 
+
+```
+
+```{r}
+
+overall_trend <- nfl_salaries %>% 
+  group_by(year) %>% 
+  summarise(salary = mean(salary, na.rm = TRUE))
+
+```
+
+```{r positional_trends_together}
+
+ggplot() +
+  geom_line(data = positional_trends, 
+            mapping = aes(year, salary, color = position), 
+            size = 1.5
+            ) +
+  geom_path(data = overall_trend, 
+            mapping = aes(year, salary), 
+            linetype = "dotted",
+            size = 1.5
+            ) +
+  scale_y_continuous(label = dollar_format())
+
+```
+
+```{r positional_trends_faceted}
+
+
+
+```
+
+----------
+
+# How is the trend different for offensive vs defensive players?
+
+```{r}
+
+
+
+```
+
+----------
+
+# 
+
