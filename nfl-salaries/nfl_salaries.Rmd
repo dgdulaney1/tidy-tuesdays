@@ -11,8 +11,9 @@ fig.width: 10
 fig.height: 7
 ---
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 
+library(rlang)
 library(tidyverse)
 library(here)
 library(readxl)
@@ -27,12 +28,18 @@ theme_set(theme_light())
 ```
 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 
 nfl_salaries_raw <- read_xlsx(here("nfl-salaries", "nfl_salaries.xlsx"))
 
 nfl_salaries <- read_xlsx(here("nfl-salaries", "nfl_salaries.xlsx")) %>% 
-  pivot_longer(-year, names_to = "position", values_to = "salary")
+  pivot_longer(-year, names_to = "position", values_to = "salary") %>% 
+  mutate(offense_or_defense = case_when(position %in% c("Offensive Lineman",
+                                                        "Quarterback",
+                                                        "Wide Receiver",
+                                                        "Tight End",
+                                                        "Running Back") ~ "Offense",
+                                        TRUE ~ "Defense"))
 
 ```
 
@@ -43,30 +50,29 @@ nfl_salaries <- read_xlsx(here("nfl-salaries", "nfl_salaries.xlsx")) %>%
 ```{r positional_salaries_overall}
 
 nfl_salaries %>% 
-  group_by(position) %>% 
+  group_by(position, offense_or_defense) %>% 
   summarise(salary = mean(salary, na.rm = TRUE)) %>% 
+  ungroup() %>% 
   mutate(position = fct_reorder(position, salary)) %>% 
-  ggplot(aes(position, salary, fill = position)) + 
+  ggplot(aes(position, salary, fill = offense_or_defense)) + 
   geom_col() +
   scale_y_continuous(labels = dollar_format()) +
   coord_flip() +
   labs(title = "Average salary from 2011-2018", 
        subtitle = "",
        x = "",
-       y = "Salary") +
-  theme(legend.position = "none")
+       y = "Salary") 
 
 ```
 
-
 ----------
 
-# How are salaries trending over time for different positions?
+# How are salaries trending over time?
 
 ```{r}
 
 positional_trends <- nfl_salaries %>% 
-  group_by(year, position) %>% 
+  group_by(year, position, offense_or_defense) %>% 
   summarise(salary = mean(salary, na.rm = TRUE)) 
 
 ```
@@ -74,7 +80,7 @@ positional_trends <- nfl_salaries %>%
 ```{r}
 
 overall_trend <- nfl_salaries %>% 
-  group_by(year) %>% 
+  group_by(year, offense_or_defense) %>% 
   summarise(salary = mean(salary, na.rm = TRUE))
 
 ```
@@ -86,32 +92,48 @@ ggplot() +
             mapping = aes(year, salary, color = position), 
             size = 1.5
             ) +
+  geom_point(data = positional_trends, 
+             mapping = aes(year, salary, color = position), 
+             size = 3.0
+            ) +
   geom_path(data = overall_trend, 
             mapping = aes(year, salary), 
-            linetype = "dotted",
+            linetype = "dashed",
             size = 1.5
             ) +
-  scale_y_continuous(label = dollar_format())
+  scale_y_continuous(label = dollar_format()) +
+  labs(title = "Salary trends over time",
+       x = "Year",
+       y = "Average salary")
 
 ```
 
+And another way to show that same info.
 ```{r positional_trends_faceted}
 
-
-
-```
-
-----------
-
-# How is the trend different for offensive vs defensive players?
-
-```{r}
-
-
+positional_trends %>% 
+  ggplot(aes(year, salary, color = offense_or_defense)) + 
+  geom_line() +
+  geom_point() + 
+  facet_wrap(~ position) +
+  scale_y_continuous(labels = dollar_format())
 
 ```
 
+Grouped by offense and defense.
+```{r offense_defense_trend}
+
+positional_trends %>% 
+  group_by(year, offense_or_defense) %>% 
+  summarise(salary = mean(salary)) %>% 
+  ggplot(aes(year, salary, color = offense_or_defense)) +
+  geom_path(size = 1.5) + 
+  geom_point(size = 3.5)
+
+```
+
+
 ----------
 
-# 
+
 
