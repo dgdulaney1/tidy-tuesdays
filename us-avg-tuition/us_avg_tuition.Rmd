@@ -21,6 +21,7 @@ library(scales)
 library(readxl)
 library(mapdata)
 library(maptools)
+library(kableExtra)
 
 ```
 
@@ -94,15 +95,39 @@ As the bar chart suggested, the highest tuition schools are in the northeast and
 
 ----------
 
-Which states have seen the largest change in tuition from 2004-2016?
+Which states have seen the largest change in tuition from 2004-2015?
 
 ```{r}
 
-tuition %>% 
-  filter()
+tuition_04_15 <- tuition %>% 
+  filter(year %in% c("2004-05", "2015-16")) %>% 
+  pivot_wider(names_from = year, values_from = avg_tuition) %>% 
+  rename(tuition_04 = `2004-05`,
+         tuition_15 = `2015-16`) %>% 
+  mutate(pct_change = (tuition_15 - tuition_04) / (tuition_04)) %>% 
+  arrange(desc(pct_change)) %>% 
+  head(10) %>% 
+  kable() %>% 
+  kable_styling()
 
 ```
 
+```{r pct_change_04_to_15, include=FALSE, eval=FALSE}
+
+tuition_04_15 %>% 
+  mutate(state = fct_reorder(state, pct_change)) %>% 
+  ggplot(aes(state, pct_change, group = 1)) +
+  geom_point(aes(state, tuition_04), color = "lightgrey") +
+  geom_point(aes(state, tuition_15), color = "red") +
+  geom_line() +
+  scale_x_continuous(labels = dollar_format()) +
+  coord_flip() +
+  labs(title = "", 
+       x = "Percent change", 
+       y = "State") +
+  theme_bw()
+
+```
 
 
 
