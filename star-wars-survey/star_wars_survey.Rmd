@@ -132,7 +132,7 @@ character_questions %>% head(5)
 # Character-specific questions
 
 ## Who are the most and least popular characters?
-```{r}
+```{r fav_each_character}
 
 character_questions %>% 
   mutate(character = fct_reorder(character, favorability_score, .desc = TRUE)) %>% 
@@ -169,7 +169,7 @@ fav_by_age_group %>% head(10)
 
 ```
 
-```{r}
+```{r fav_by_age_group}
 
 fav_by_age_group %>%
   ggplot(aes(age_group, fav_score, fill = age_group)) +

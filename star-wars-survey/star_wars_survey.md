@@ -192,7 +192,7 @@ character_questions %>%
   theme(legend.position = "none")
 ```
 
-![](star_wars_survey_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](star_wars_survey_files/figure-gfm/fav_each_character-1.png)<!-- -->
 
 This is a great demonstration of what vague survey questions can lead to
 :)
@@ -238,7 +238,7 @@ fav_by_age_group %>%
   coord_flip()
 ```
 
-![](star_wars_survey_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](star_wars_survey_files/figure-gfm/fav_by_age_group-1.png)<!-- -->
 
 -----
 
