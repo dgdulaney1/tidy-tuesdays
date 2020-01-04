@@ -3,17 +3,18 @@ title: "Analyzing Tidy Tuesday Star Wars Survey Dataset"
 subtitle: ""
 output:
   github_document
-allow_html: true
+always_allow_html: true
 editor_options:
   chunk_output_type: console
 ---
 
-# Setup
+## Setup
 
-```{r libs}
+```{r libs, message=FALSE, warning=FALSE}
 
 library(tidyverse)
 library(here)
+library(kableExtra)
 
 ```
 
@@ -78,21 +79,8 @@ star_wars_survey <- read_csv("https://raw.githubusercontent.com/rfordatascience/
          education = Education,
          region = `Location (Census Region)`) %>% 
   slice(2:nrow(.)) %>% 
-  mutate(age_group = fct_relevel(age_group, c(NA, "18-29", "30-44", "45-60", "> 60")))
-
-```
-
-```{r film_questions, eval=FALSE, include=FALSE}
-
-film_questions <- star_wars_survey %>% 
-  select(-contains("fav")) %>% 
-  pivot_longer(
-    cols = contains("seen"),
-    names_to = "film",
-    values_to = ""
-    )
-
-film_questions %>% head(5)
+  mutate(age_group = fct_relevel(age_group, c(NA, "18-29", "30-44", "45-60", "> 60"))) %>% 
+  mutate_at(.vars = vars(seen_ep_I:seen_ep_VI), .funs = ~ifelse(is.na(.), 0, 1))
 
 ```
 
@@ -127,13 +115,15 @@ character_questions <- star_wars_survey %>%
                                         TRUE ~ -9999))
 
 character_questions %>% 
-  head(5)
+  head(5) %>% 
+  kable() %>% 
+  kable_styling()
 
 ```
 
 ### Who are the most popular characters?
 
-```{r fav-each-character}
+```{r character-fav-overall}
 
 character_questions %>% 
   mutate(character = fct_reorder(character, favorability_score, .desc = TRUE)) %>% 
@@ -147,7 +137,7 @@ character_questions %>%
        y = "Count") +
   theme(legend.position = "none")
 
-ggsave(here("star-wars-survey", "plots", "fav-each-character.png"))
+ggsave(here("star-wars-survey", "plots", "character-fav-overall.png"))
 
 ```
 
@@ -157,18 +147,18 @@ People love Vader but gave him bad "favorability" because he's an asshole, where
 
 ### Which characters see favorability differences between different age groups?
 
-```{r fav_by_age_group}
+```{r character_fav_by_age_group}
 
-fav_by_age_group <- character_questions %>% 
+character_fav_by_age_group <- character_questions %>% 
   group_by(character, age_group) %>% 
   summarise(n = n(), fav_score = mean(favorability_score, na.rm = TRUE)) %>% 
   drop_na()
 
 ```
 
-```{r fav-by-age-group}
+```{r character-fav-by-age-group}
 
-fav_by_age_group %>%
+character_fav_by_age_group %>%
   ggplot(aes(age_group, fav_score, fill = age_group)) +
   geom_col() +
   facet_wrap(~ character) +
@@ -178,7 +168,7 @@ fav_by_age_group %>%
        x = "Age group",
        y = "Favorability score")
 
-ggsave(here("star-wars-survey", "plots", "fav-by-age-group.png"))
+ggsave(here("star-wars-survey", "plots", "character-fav-by-age-group.png"))
 
 ```
 
@@ -203,7 +193,7 @@ expanded_fav_diff <- character_questions %>%
 
 ```
 
-```{r}
+```{r character-fav-by-exp-univ}
 
 character_questions %>% 
   group_by(character, familiar_with_expanded) %>% 
@@ -217,7 +207,11 @@ character_questions %>%
   geom_point(size = 5) +
   coord_flip() +
   ylim(-3, 4) +
-  labs(title = "")
+  labs(title = "Character favorability for those who are and are not familiar with the Expanded Universe",
+       y = "Favorability Score",
+       x = "")
+
+ggsave(here("star-wars-survey", "plots", "character-fav-by-exp-univ.png"))
 
 ```
 
@@ -225,20 +219,113 @@ I was hoping to find a few characters like Boba Fett and Palpatine, who I know a
 
 ## Film-specific questions
 
-### Which movie is most beloved?
+I again create a subsetted long-form dataset, but this time it contains film-specific questions.
 
-## What is the distribution of film rank for each movie?
+```{r saw_ep_long}
 
-## How do film rankings look across age groups?
+saw_ep_long <- star_wars_survey %>% 
+  select(-contains("fav"), -contains("rank")) %>% 
+  pivot_longer(cols = seen_ep_I:seen_ep_VI,
+               names_to = "film",
+               values_to = "saw_ep") %>% 
+  mutate(film = str_remove(film, "seen_"))
+  
 
+```
 
+```{r ep_rank_long}
 
+ep_rank_long <- star_wars_survey %>% 
+  select(-contains("fav"), -contains("seen_ep")) %>% 
+  pivot_longer(cols = ep_I_rank:ep_VI_rank,
+               names_to = "film",
+               values_to = "ep_rank") %>% 
+  mutate(film = str_remove(film, "_rank"))
 
-# Are there any interesting character-film relationships? For ex: Do those who like Anakin like prequels more, and Luke sequels more?
+```
 
-# Are there trends among those who aren't fans?
+```{r film_questions}
+
+film_questions <- inner_join(saw_ep_long, ep_rank_long)
+
+# shows data for 2 respondents (12 rows because 2 * 6 movies = 12 rows for 2 respondents)
+film_questions %>% 
+  head(12) %>% 
+  kable() %>% 
+  kable_styling()
+
+```
+
+### What is the distribution of film rank for each movie?
+
+```{r movie-fav-overall}
+
+film_questions %>% 
+  filter(saw_ep == 1) %>% 
+  mutate(film = fct_relevel(film, c("ep_I", "ep_IV", "ep_II", "ep_V", "ep_III", "ep_VI")),
+         ep_rank = fct_relevel(ep_rank, c("6", "5", "4", "3", "2", "1"))) %>%
+  drop_na() %>% 
+  ggplot(aes(ep_rank, fill = ep_rank)) +
+  geom_bar(stat = "count") +
+  facet_wrap(~ film, scales = "free_y", ncol = 2) +
+  coord_flip() +
+  scale_fill_manual(values = c("red4", "red3", "red", "green", "green3", "green4")) +
+  labs(title = "Favorability of each movie",
+       x = "Episode rank",
+       y = "Count") +
+  theme(legend.position = "none")
+
+ggsave(here("star-wars-survey", "plots", "movie-fav-overall.png"))
+
+```
+
+Staunch differences between the OT and the PT. Also interesting that 4 and 5 have a similar total of positive/negative votes, but 5 is the overall favorite for waaay more people.
+
+### And what about for different age groups?
+
+```{r movie-fav-by-age}
+
+film_questions %>% 
+  filter(saw_ep == 1) %>% 
+  mutate(film = fct_relevel(film, c("ep_I", "ep_II", "ep_III", "ep_IV", "ep_V", "ep_VI")),
+         ep_rank = fct_relevel(ep_rank, c("6", "5", "4", "3", "2", "1"))) %>%
+  drop_na() %>% 
+  ggplot(aes(ep_rank, fill = ep_rank)) +
+  geom_bar(stat = "count") +
+  facet_grid(age_group ~ film, scales = "free_y") +
+  coord_flip() +
+  scale_fill_manual(values = c("red4", "red3", "red", "green", "green3", "green4")) +
+  labs(title = "Favorability of each movie among different age groups",
+       x = "Episode rank",
+       y = "Count") +
+  theme(legend.position = "none")
+
+ggsave(here("star-wars-survey", "plots", "movie-fav-by-age.png"))
+
+```
+
+Not much is surprising about the OT movies here with older groups favoring them slightly more. The Prequel movies are odd though...Episodes 2 and 3 follow a pattern I expected: slightly higher favorability among younger folks but still negative. So my question from this is: Why do 45+ year olds like Episode 1 so much?
 
 ## Appendix
+
+### Which movies have been seen by the most people?
+
+```{r}
+
+film_questions %>% 
+  mutate(film = fct_reorder(film, saw_ep, .fun = mean, .desc = TRUE)) %>%
+  group_by(film, age_group) %>% 
+  summarise(pct_seen = sum(saw_ep) / n()) %>% 
+  ungroup() %>% 
+  drop_na() %>%
+  ggplot(aes(film, pct_seen, fill = age_group)) +
+  geom_col() +
+  coord_flip() +
+  labs()
+
+```
+
+Not much interesting to see here besides the overall rank. I'm surprised that more have seen 5 and 6 than 4, though it goes to show how much Star Wars caught on after A New Hope. The Prequel Trilogy, on the other hand, started poorly with Episode 1 and so it's unsurprising that fewer people ended up seeing 2 and 3.
 
 
 

@@ -1,28 +1,13 @@
 Analyzing Tidy Tuesday Star Wars Survey Dataset
 ================
 
-# Setup
+## Setup
 
 ``` r
 library(tidyverse)
-```
-
-    ## -- Attaching packages ---------------------------------------------------------------------------------------------------------------------------------------- tidyverse 1.3.0 --
-
-    ## <U+2713> ggplot2 3.2.1     <U+2713> purrr   0.3.3
-    ## <U+2713> tibble  2.1.3     <U+2713> dplyr   0.8.3
-    ## <U+2713> tidyr   1.0.0     <U+2713> stringr 1.4.0
-    ## <U+2713> readr   1.3.1     <U+2713> forcats 0.4.0
-
-    ## -- Conflicts ------------------------------------------------------------------------------------------------------------------------------------------- tidyverse_conflicts() --
-    ## x dplyr::filter() masks stats::filter()
-    ## x dplyr::lag()    masks stats::lag()
-
-``` r
 library(here)
+library(kableExtra)
 ```
-
-    ## here() starts at D:/Documents/learning/tidy-tuesdays
 
 ``` r
 theme_set(theme_light())
@@ -80,7 +65,8 @@ star_wars_survey <- read_csv("https://raw.githubusercontent.com/rfordatascience/
          education = Education,
          region = `Location (Census Region)`) %>% 
   slice(2:nrow(.)) %>% 
-  mutate(age_group = fct_relevel(age_group, c(NA, "18-29", "30-44", "45-60", "> 60")))
+  mutate(age_group = fct_relevel(age_group, c(NA, "18-29", "30-44", "45-60", "> 60"))) %>% 
+  mutate_at(.vars = vars(seen_ep_I:seen_ep_VI), .funs = ~ifelse(is.na(.), 0, 1))
 ```
 
 ## Character-specific questions
@@ -116,20 +102,550 @@ character_questions <- star_wars_survey %>%
                                         TRUE ~ -9999))
 
 character_questions %>% 
-  head(5)
+  head(5) %>% 
+  kable() %>% 
+  kable_styling()
 ```
 
-    ## # A tibble: 5 x 14
-    ##   RespondentID seen_any_star_w… fan_of_star_wars which_char_shot…
-    ##          <dbl> <chr>            <chr>            <chr>           
-    ## 1   3292879998 Yes              Yes              I don't underst…
-    ## 2   3292879998 Yes              Yes              I don't underst…
-    ## 3   3292879998 Yes              Yes              I don't underst…
-    ## 4   3292879998 Yes              Yes              I don't underst…
-    ## 5   3292879998 Yes              Yes              I don't underst…
-    ## # … with 10 more variables: familiar_with_expanded <chr>, star_trek_fan <chr>,
-    ## #   gender <chr>, age_group <fct>, income <chr>, education <chr>, region <chr>,
-    ## #   character <chr>, favorability <fct>, favorability_score <dbl>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+
+<thead>
+
+<tr>
+
+<th style="text-align:right;">
+
+RespondentID
+
+</th>
+
+<th style="text-align:left;">
+
+seen\_any\_star\_wars
+
+</th>
+
+<th style="text-align:left;">
+
+fan\_of\_star\_wars
+
+</th>
+
+<th style="text-align:left;">
+
+which\_char\_shot\_first
+
+</th>
+
+<th style="text-align:left;">
+
+familiar\_with\_expanded
+
+</th>
+
+<th style="text-align:left;">
+
+star\_trek\_fan
+
+</th>
+
+<th style="text-align:left;">
+
+gender
+
+</th>
+
+<th style="text-align:left;">
+
+age\_group
+
+</th>
+
+<th style="text-align:left;">
+
+income
+
+</th>
+
+<th style="text-align:left;">
+
+education
+
+</th>
+
+<th style="text-align:left;">
+
+region
+
+</th>
+
+<th style="text-align:left;">
+
+character
+
+</th>
+
+<th style="text-align:left;">
+
+favorability
+
+</th>
+
+<th style="text-align:right;">
+
+favorability\_score
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879998
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+I don’t understand this question
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+High school degree
+
+</td>
+
+<td style="text-align:left;">
+
+South Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+han
+
+</td>
+
+<td style="text-align:left;">
+
+Very favorably
+
+</td>
+
+<td style="text-align:right;">
+
+4
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879998
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+I don’t understand this question
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+High school degree
+
+</td>
+
+<td style="text-align:left;">
+
+South Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+luke
+
+</td>
+
+<td style="text-align:left;">
+
+Very favorably
+
+</td>
+
+<td style="text-align:right;">
+
+4
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879998
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+I don’t understand this question
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+High school degree
+
+</td>
+
+<td style="text-align:left;">
+
+South Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+leia
+
+</td>
+
+<td style="text-align:left;">
+
+Very favorably
+
+</td>
+
+<td style="text-align:right;">
+
+4
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879998
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+I don’t understand this question
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+High school degree
+
+</td>
+
+<td style="text-align:left;">
+
+South Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+anakin
+
+</td>
+
+<td style="text-align:left;">
+
+Very favorably
+
+</td>
+
+<td style="text-align:right;">
+
+4
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879998
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+I don’t understand this question
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+High school degree
+
+</td>
+
+<td style="text-align:left;">
+
+South Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+obi\_won
+
+</td>
+
+<td style="text-align:left;">
+
+Very favorably
+
+</td>
+
+<td style="text-align:right;">
+
+4
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 ### Who are the most popular characters?
 
@@ -147,10 +663,10 @@ character_questions %>%
   theme(legend.position = "none")
 ```
 
-![](star_wars_survey_files/figure-gfm/fav-each-character-1.png)<!-- -->
+![](star_wars_survey_files/figure-gfm/character-fav-overall-1.png)<!-- -->
 
 ``` r
-ggsave(here("star-wars-survey", "plots", "fav-each-character.png"))
+ggsave(here("star-wars-survey", "plots", "character-fav-overall.png"))
 ```
 
 This is a great demonstration of what vague survey questions can lead to
@@ -164,14 +680,14 @@ reviews as well, probably because so many people hate those movies.
 ### Which characters see favorability differences between different age groups?
 
 ``` r
-fav_by_age_group <- character_questions %>% 
+character_fav_by_age_group <- character_questions %>% 
   group_by(character, age_group) %>% 
   summarise(n = n(), fav_score = mean(favorability_score, na.rm = TRUE)) %>% 
   drop_na()
 ```
 
 ``` r
-fav_by_age_group %>%
+character_fav_by_age_group %>%
   ggplot(aes(age_group, fav_score, fill = age_group)) +
   geom_col() +
   facet_wrap(~ character) +
@@ -182,10 +698,10 @@ fav_by_age_group %>%
        y = "Favorability score")
 ```
 
-![](star_wars_survey_files/figure-gfm/fav-by-age-group-1.png)<!-- -->
+![](star_wars_survey_files/figure-gfm/character-fav-by-age-group-1.png)<!-- -->
 
 ``` r
-ggsave(here("star-wars-survey", "plots", "fav-by-age-group.png"))
+ggsave(here("star-wars-survey", "plots", "character-fav-by-age-group.png"))
 ```
 
 A few conclusions:
@@ -224,10 +740,16 @@ character_questions %>%
   geom_point(size = 5) +
   coord_flip() +
   ylim(-3, 4) +
-  labs(title = "")
+  labs(title = "Character favorability for those who are and are not familiar with the Expanded Universe",
+       y = "Favorability Score",
+       x = "")
 ```
 
-![](star_wars_survey_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+![](star_wars_survey_files/figure-gfm/character-fav-by-exp-univ-1.png)<!-- -->
+
+``` r
+ggsave(here("star-wars-survey", "plots", "character-fav-by-exp-univ.png"))
+```
 
 I was hoping to find a few characters like Boba Fett and Palpatine, who
 I know are more fleshed out in the EU, appear at the top\! I’m not sure
@@ -236,14 +758,1274 @@ are quite a few.
 
 ## Film-specific questions
 
-### Which movie is most beloved?
+I again create a subsetted long-form dataset, but this time it contains
+film-specific questions.
 
-## What is the distribution of film rank for each movie?
+``` r
+saw_ep_long <- star_wars_survey %>% 
+  select(-contains("fav"), -contains("rank")) %>% 
+  pivot_longer(cols = seen_ep_I:seen_ep_VI,
+               names_to = "film",
+               values_to = "saw_ep") %>% 
+  mutate(film = str_remove(film, "seen_"))
+```
 
-## How do film rankings look across age groups?
+``` r
+ep_rank_long <- star_wars_survey %>% 
+  select(-contains("fav"), -contains("seen_ep")) %>% 
+  pivot_longer(cols = ep_I_rank:ep_VI_rank,
+               names_to = "film",
+               values_to = "ep_rank") %>% 
+  mutate(film = str_remove(film, "_rank"))
+```
 
-# Are there any interesting character-film relationships? For ex: Do those who like Anakin like prequels more, and Luke sequels more?
+``` r
+film_questions <- inner_join(saw_ep_long, ep_rank_long)
 
-# Are there trends among those who aren’t fans?
+# shows data for 2 respondents (12 rows because 2 * 6 movies = 12 rows for 2 respondents)
+film_questions %>% 
+  head(12) %>% 
+  kable() %>% 
+  kable_styling()
+```
+
+<table class="table" style="margin-left: auto; margin-right: auto;">
+
+<thead>
+
+<tr>
+
+<th style="text-align:right;">
+
+RespondentID
+
+</th>
+
+<th style="text-align:left;">
+
+seen\_any\_star\_wars
+
+</th>
+
+<th style="text-align:left;">
+
+fan\_of\_star\_wars
+
+</th>
+
+<th style="text-align:left;">
+
+which\_char\_shot\_first
+
+</th>
+
+<th style="text-align:left;">
+
+familiar\_with\_expanded
+
+</th>
+
+<th style="text-align:left;">
+
+star\_trek\_fan
+
+</th>
+
+<th style="text-align:left;">
+
+gender
+
+</th>
+
+<th style="text-align:left;">
+
+age\_group
+
+</th>
+
+<th style="text-align:left;">
+
+income
+
+</th>
+
+<th style="text-align:left;">
+
+education
+
+</th>
+
+<th style="text-align:left;">
+
+region
+
+</th>
+
+<th style="text-align:left;">
+
+film
+
+</th>
+
+<th style="text-align:right;">
+
+saw\_ep
+
+</th>
+
+<th style="text-align:left;">
+
+ep\_rank
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879998
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+I don’t understand this question
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+High school degree
+
+</td>
+
+<td style="text-align:left;">
+
+South Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+ep\_I
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+3
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879998
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+I don’t understand this question
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+High school degree
+
+</td>
+
+<td style="text-align:left;">
+
+South Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+ep\_II
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+2
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879998
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+I don’t understand this question
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+High school degree
+
+</td>
+
+<td style="text-align:left;">
+
+South Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+ep\_III
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+1
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879998
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+I don’t understand this question
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+High school degree
+
+</td>
+
+<td style="text-align:left;">
+
+South Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+ep\_IV
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+4
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879998
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+I don’t understand this question
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+High school degree
+
+</td>
+
+<td style="text-align:left;">
+
+South Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+ep\_V
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+5
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879998
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+I don’t understand this question
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+High school degree
+
+</td>
+
+<td style="text-align:left;">
+
+South Atlantic
+
+</td>
+
+<td style="text-align:left;">
+
+ep\_VI
+
+</td>
+
+<td style="text-align:right;">
+
+1
+
+</td>
+
+<td style="text-align:left;">
+
+6
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879538
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+$0 - $24,999
+
+</td>
+
+<td style="text-align:left;">
+
+Bachelor degree
+
+</td>
+
+<td style="text-align:left;">
+
+West South Central
+
+</td>
+
+<td style="text-align:left;">
+
+ep\_I
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879538
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+$0 - $24,999
+
+</td>
+
+<td style="text-align:left;">
+
+Bachelor degree
+
+</td>
+
+<td style="text-align:left;">
+
+West South Central
+
+</td>
+
+<td style="text-align:left;">
+
+ep\_II
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879538
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+$0 - $24,999
+
+</td>
+
+<td style="text-align:left;">
+
+Bachelor degree
+
+</td>
+
+<td style="text-align:left;">
+
+West South Central
+
+</td>
+
+<td style="text-align:left;">
+
+ep\_III
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879538
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+$0 - $24,999
+
+</td>
+
+<td style="text-align:left;">
+
+Bachelor degree
+
+</td>
+
+<td style="text-align:left;">
+
+West South Central
+
+</td>
+
+<td style="text-align:left;">
+
+ep\_IV
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879538
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+$0 - $24,999
+
+</td>
+
+<td style="text-align:left;">
+
+Bachelor degree
+
+</td>
+
+<td style="text-align:left;">
+
+West South Central
+
+</td>
+
+<td style="text-align:left;">
+
+ep\_V
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:right;">
+
+3292879538
+
+</td>
+
+<td style="text-align:left;">
+
+No
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+<td style="text-align:left;">
+
+Yes
+
+</td>
+
+<td style="text-align:left;">
+
+Male
+
+</td>
+
+<td style="text-align:left;">
+
+18-29
+
+</td>
+
+<td style="text-align:left;">
+
+$0 - $24,999
+
+</td>
+
+<td style="text-align:left;">
+
+Bachelor degree
+
+</td>
+
+<td style="text-align:left;">
+
+West South Central
+
+</td>
+
+<td style="text-align:left;">
+
+ep\_VI
+
+</td>
+
+<td style="text-align:right;">
+
+0
+
+</td>
+
+<td style="text-align:left;">
+
+NA
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+### What is the distribution of film rank for each movie?
+
+``` r
+film_questions %>% 
+  filter(saw_ep == 1) %>% 
+  mutate(film = fct_relevel(film, c("ep_I", "ep_IV", "ep_II", "ep_V", "ep_III", "ep_VI")),
+         ep_rank = fct_relevel(ep_rank, c("6", "5", "4", "3", "2", "1"))) %>%
+  drop_na() %>% 
+  ggplot(aes(ep_rank, fill = ep_rank)) +
+  geom_bar(stat = "count") +
+  facet_wrap(~ film, scales = "free_y", ncol = 2) +
+  coord_flip() +
+  scale_fill_manual(values = c("red4", "red3", "red", "green", "green3", "green4")) +
+  labs(title = "Favorability of each movie",
+       x = "Episode rank",
+       y = "Count") +
+  theme(legend.position = "none")
+```
+
+![](star_wars_survey_files/figure-gfm/movie-fav-overall-1.png)<!-- -->
+
+``` r
+ggsave(here("star-wars-survey", "plots", "movie-fav-overall.png"))
+```
+
+Staunch differences between the OT and the PT. Also interesting that 4
+and 5 have a similar total of positive/negative votes, but 5 is the
+overall favorite for waaay more people.
+
+### And what about for different age groups?
+
+``` r
+film_questions %>% 
+  filter(saw_ep == 1) %>% 
+  mutate(film = fct_relevel(film, c("ep_I", "ep_II", "ep_III", "ep_IV", "ep_V", "ep_VI")),
+         ep_rank = fct_relevel(ep_rank, c("6", "5", "4", "3", "2", "1"))) %>%
+  drop_na() %>% 
+  ggplot(aes(ep_rank, fill = ep_rank)) +
+  geom_bar(stat = "count") +
+  facet_grid(age_group ~ film, scales = "free_y") +
+  coord_flip() +
+  scale_fill_manual(values = c("red4", "red3", "red", "green", "green3", "green4")) +
+  labs(title = "Favorability of each movie among different age groups",
+       x = "Episode rank",
+       y = "Count") +
+  theme(legend.position = "none")
+```
+
+![](star_wars_survey_files/figure-gfm/movie-fav-by-age-1.png)<!-- -->
+
+``` r
+ggsave(here("star-wars-survey", "plots", "movie-fav-by-age.png"))
+```
+
+Not much is surprising about the OT movies here with older groups
+favoring them slightly more. The Prequel movies are odd though…Episodes
+2 and 3 follow a pattern I expected: slightly higher favorability among
+younger folks but still negative. So my question from this is: Why do
+45+ year olds like Episode 1 so much?
 
 ## Appendix
+
+### Which movies have been seen by the most people?
+
+``` r
+film_questions %>% 
+  mutate(film = fct_reorder(film, saw_ep, .fun = mean, .desc = TRUE)) %>%
+  group_by(film, age_group) %>% 
+  summarise(pct_seen = sum(saw_ep) / n()) %>% 
+  ungroup() %>% 
+  drop_na() %>%
+  ggplot(aes(film, pct_seen, fill = age_group)) +
+  geom_col() +
+  coord_flip() +
+  labs()
+```
+
+![](star_wars_survey_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+
+Not much interesting to see here besides the overall rank. I’m surprised
+that more have seen 5 and 6 than 4, though it goes to show how much Star
+Wars caught on after A New Hope. The Prequel Trilogy, on the other hand,
+started poorly with Episode 1 and so it’s unsurprising that fewer people
+ended up seeing 2 and 3.
